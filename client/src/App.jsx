@@ -1,23 +1,31 @@
 import { useEffect, useState } from "react";
+import Layout from "./components/layout/Layout";
+import Dashboard from "./components/pages/Dashboard";
+import Workflow from "./components/pages/Workflow";
 
 function App() {
-  const [msg, setMsg] = useState("Loading...");
+  const [route, setRoute] = useState("dashboard");
 
   useEffect(() => {
-    fetch("/api/test")
-      .then((res) => res.json())
-      .then((data) => setMsg(data.message))
-      .catch((err) => {
-        console.error(err);
-        setMsg("Error connecting to backend");
-      });
+    const updateRoute = () => {
+      const hash = window.location.hash.replace("#/", "");
+      setRoute(hash || "dashboard");
+    };
+
+    updateRoute();
+    window.addEventListener("hashchange", updateRoute);
+
+    return () => window.removeEventListener("hashchange", updateRoute);
   }, []);
 
-  return (
-    <div style={{ padding: "40px", fontSize: "24px" }}>
-      {msg}
-    </div>
-  );
+  let page;
+  if (route === "workflow") {
+    page = <Workflow />;
+  } else {
+    page = <Dashboard />;
+  }
+
+  return <Layout>{page}</Layout>;
 }
 
 export default App;
