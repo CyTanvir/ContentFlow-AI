@@ -2,13 +2,13 @@ import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import "../styles/layout.css";
 
-const Layout = ({ children }) => {
+const Layout = ({ children, onLogout}) => {
   return (
     <div className="app-layout">
       <Sidebar />
 
       <div className="main-area">
-        <Topbar />
+        <Topbar onLogout={onLogout} />
         <div className="content-area">
           {children}
         </div>

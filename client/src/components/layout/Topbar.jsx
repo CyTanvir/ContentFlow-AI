@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "../styles/layout.css";
 import userIcon from "../../assets/user.png";
 
-const Topbar = ({ title = "Dashboard", subtitle = "Automated content workflow overview" }) => {
+const Topbar = ({ title = "Dashboard", subtitle = "Automated content workflow overview", onLogout }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -13,6 +13,11 @@ const Topbar = ({ title = "Dashboard", subtitle = "Automated content workflow ov
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
   }, []);
+
+  const handleSignOut = () => {
+    setOpen(false);
+    if(typeof onLogout === "function") onLogout();
+  };
 
   return (
     <header className="topbar">
@@ -39,7 +44,7 @@ const Topbar = ({ title = "Dashboard", subtitle = "Automated content workflow ov
             <button className="menu-item" role="menuitem">Profile</button>
             <button className="menu-item" role="menuitem">Settings</button>
             <div className="menu-divider" />
-            <button className="menu-item danger" role="menuitem">Sign out</button>
+            <button className="menu-item danger" role="menuitem" onClick={handleSignOut}>Sign out</button>
           </div>
         )}
       </div>
