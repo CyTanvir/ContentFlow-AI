@@ -1,23 +1,17 @@
-import { useEffect, useState } from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Signup from './pages/Signup';
+import './App.css';
 
 function App() {
-  const [msg, setMsg] = useState("Loading...");
-
-  useEffect(() => {
-    fetch("/api/test")
-      .then((res) => res.json())
-      .then((data) => setMsg(data.message))
-      .catch((err) => {
-        console.error(err);
-        setMsg("Error connecting to backend");
-      });
-  }, []);
-
   return (
-    <div style={{ padding: "40px", fontSize: "24px" }}>
-      {msg}
-    </div>
+    <Router>
+      <Routes>
+        <Route path="/" element={<Navigate to="/signup" />} />
+        <Route path="/signup" element={<Signup />} />
+      </Routes>
+    </Router>
   );
 }
 
 export default App;
+
