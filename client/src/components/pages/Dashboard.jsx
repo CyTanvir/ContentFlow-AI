@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-function App() {
+const Dashboard = () => {
   const [msg, setMsg] = useState("Loading...");
 
   useEffect(() => {
@@ -14,11 +14,11 @@ function App() {
   }, []);
 
   return (
-    <div style={{ padding: "40px", fontSize: "24px" }}>
-      {msg}
+    <div>
+      <h3>Backend Status</h3>
+      <p>{msg}</p>
     </div>
   );
-}
+};
 
-export default App;
-
+export default Dashboard;
