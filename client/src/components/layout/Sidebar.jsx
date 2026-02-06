@@ -1,0 +1,94 @@
+import React, { useEffect, useState } from "react";
+import "../styles/layout.css";
+import dashboardIcon from "../../assets/dashboard.png";
+import workflowIcon from "../../assets/Workflow.png";
+import projectsIcon from "../../assets/projects.png";
+import toolsIcon from "../../assets/tools.png";
+import settingIcon from "../../assets/setting.png";
+import helpIcon from "../../assets/help.png";
+
+const routes = [
+  { key: "dashboard", label: "Dashboard", hash: "#/dashboard" },
+  { key: "workflow", label: "Workflow", hash: "#/workflow" },
+  { key: "documents", label: "AI Tools", hash: "#/aitools" },
+  { key: "review", label: "Projects", hash: "#/projects" }
+
+];
+
+const Sidebar = () => {
+  const [active, setActive] = useState(() => (window.location.hash || "#/dashboard").replace("#/", ""));
+
+  useEffect(() => {
+    const onHash = () => setActive((window.location.hash || "#/dashboard").replace("#/", ""));
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
+  }, []);
+
+  const navigate = (hash) => {
+    if (window.location.hash !== hash) window.location.hash = hash;
+  };
+
+  return (
+    <aside className="sidebar">
+      <div className="sidebar-brand">
+        <div className="brand-title">ContentFlow AI</div>
+      </div>
+
+      <nav className="sidebar-nav">
+        {routes.map((r) => {
+          const labelKey = r.label.toLowerCase();
+          let icon = null;
+          if (labelKey.includes("dash")) icon = dashboardIcon;
+          else if (labelKey.includes("work")) icon = workflowIcon;
+          else if (labelKey.includes("project")) icon = projectsIcon;
+          else if (labelKey.includes("tool") || labelKey.includes("ai")) icon = toolsIcon;
+
+          return (
+            <button
+              key={r.key}
+              className={`nav-item ${active === r.key ? "active" : ""}`}
+              onClick={() => navigate(r.hash)}
+            >
+              {icon ? <img src={icon} alt="" className="nav-icon-img nav-icon-small" /> : <span className="nav-icon" aria-hidden />}
+              <span className="nav-label">{r.label}</span>
+            </button>
+          );
+        })}
+      </nav>
+
+      <div className="sidebar-bottom">
+        <div className="sidebar-actions">
+          <button className="action-item" onClick={() => navigate('#/settings')}>
+            <img src={settingIcon} alt="settings" style={{width:16,height:16,marginRight:8}} />
+            Settings
+          </button>
+          <button className="action-item" onClick={() => navigate('#/help')}>
+            <img src={helpIcon} alt="help" style={{width:16,height:16,marginRight:8}} />
+            Help
+          </button>
+        </div>
+
+        <div className="analytics-card">
+          <div className="analytics-title">Analytics Overview</div>
+          <div className="analytics-stats">
+            <div className="stat">
+              <div className="stat-label">Monthly Views</div>
+              <div className="stat-value">12.4K</div>
+            </div>
+            <div className="stat">
+              <div className="stat-label">Engagement Rate</div>
+              <div className="stat-value">6.8%</div>
+            </div>
+          </div>
+          <div className="sparkline" aria-hidden>
+            <svg width="100%" height="40" viewBox="0 0 100 40" preserveAspectRatio="none">
+              <polyline points="0,30 20,24 40,18 60,22 80,14 100,20" fill="none" stroke="#7c3aed" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </div>
+        </div>
+      </div>
+    </aside>
+  );
+};
+
+export default Sidebar;
