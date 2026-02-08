@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import "../styles/layout.css";
 import userIcon from "../../assets/user.png";
 
-const Topbar = ({ title = "Dashboard", subtitle = "Automated content workflow overview", onLogout }) => {
+const Topbar = ({ displayName, title = "Dashboard", subtitle = "Automated content workflow overview", onLogout }) => {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
 
@@ -22,7 +22,7 @@ const Topbar = ({ title = "Dashboard", subtitle = "Automated content workflow ov
   return (
     <header className="topbar">
       <div className="topbar-left">
-        <h2>{title}</h2>
+      <h2>{displayName ? `Welcome, ${displayName}` : title}</h2>
         <p>{subtitle}</p>
       </div>
 

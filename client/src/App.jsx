@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { signOut } from "firebase/auth";
+import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./firebase";
 
 import Layout from "./components/layout/Layout";
@@ -8,17 +8,20 @@ import Workflow from "./components/pages/Workflow";
 import Login from "./components/pages/Login";
 
 function App() {
-  console.log("App rendering");
-  
   const [route, setRoute] = useState("dashboard");
-  const [isLoggedIn, setIsLoggedIn] = useState(() => {
-    return !!localStorage.getItem("userSession");
-  });
-
-  console.log("isLoggedIn:", isLoggedIn);
+  const [user, setUser] = useState(null);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    if (!isLoggedIn) return;
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setCheckingAuth(false);
+    });
+    return () => unsub();
+  }, []);
+
+  useEffect(() => {
+    if (!user) return;
 
     const updateRoute = () => {
       const hash = window.location.hash.replace("#/", "");
@@ -27,14 +30,8 @@ function App() {
 
     updateRoute();
     window.addEventListener("hashchange", updateRoute);
-
     return () => window.removeEventListener("hashchange", updateRoute);
-  }, [isLoggedIn]);
-
-  const handleLogin = (user) => {
-    localStorage.setItem("userSession", JSON.stringify(user));
-    setIsLoggedIn(true);
-  };
+  }, [user]);
 
   const handleLogout = async () => {
     try {
@@ -42,24 +39,26 @@ function App() {
     } catch (error) {
       console.error("Error signing out:", error);
     } finally {
-      localStorage.removeItem("userSession");
-      setIsLoggedIn(false);
+      window.location.hash = "#/dashboard";
     }
   };
 
-  if (!isLoggedIn) {
-    console.log("Rendering Login");
-    return <Login onLogin={handleLogin} />;
+  if (checkingAuth) return null;
+
+  if (!user) {
+    return <Login />;
   }
 
-  let page;
-  if (route === "workflow") {
-    page = <Workflow />;
-  } else {
-    page = <Dashboard />;
-  }
+  const rawName = user.displayName || user.email || "User";
+  const displayName = rawName.split("@")[0];
 
-  return <Layout onLogout={handleLogout}>{page}</Layout>;
+  const page = route === "workflow" ? <Workflow /> : <Dashboard />;
+
+  return (
+    <Layout onLogout={handleLogout} displayName={displayName}>
+      {page}
+    </Layout>
+  );
 }
 
 export default App;
