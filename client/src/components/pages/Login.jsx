@@ -1,17 +1,17 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../../firebase";
 import "../styles/login.css";
 
 export default function Login({ onLogin }) {
+    const navigate = useNavigate();
     console.log("Rendering Login component");
     
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
-    const [isSignUp, setIsSignUp] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -21,23 +21,10 @@ export default function Login({ onLogin }) {
             setError("Please enter both email and password.");
             return;
         }
-        
-        if(isSignUp) {
-            if(password !== confirmPassword) {
-                setError("Passwords do not match.");
-                return;
-            }
-        }
 
         setLoading(true);
         try {
-            let userCredential;
-            if(isSignUp) {
-                userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            } else {
-                userCredential = await signInWithEmailAndPassword(auth, email, password);
-            }
-
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
             const idToken = await user.getIdToken();
 
@@ -48,13 +35,6 @@ export default function Login({ onLogin }) {
         } finally {
             setLoading(false);
         }
-    };
-
-    const toggleMode = () => {
-        setIsSignUp(!isSignUp);
-        setError("");
-        setPassword("");
-        setConfirmPassword("");
     };
 
     return (
@@ -82,28 +62,20 @@ export default function Login({ onLogin }) {
                             placeholder="Enter your password"
                         />
                     </div>
-                    {isSignUp && (
-                        <div className="form-group">
-                            <label htmlFor="confirmPassword">Confirm Password:</label>
-                            <input
-                                type="password"
-                                id="confirmPassword"
-                                value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
-                                placeholder="Confirm your password"
-                            />
-                        </div>
-                    )}
                     {error && <div className="error-message">{error}</div>}
                     <button type="submit" className="login-btn" disabled={loading}>
-                        {loading ? (isSignUp ? "Signing up..." : "Logging in...") : (isSignUp ? "Sign Up" : "Login")}
+                        {loading ? "Logging in..." : "Login"}
                     </button>
                 </form>
                 <div className="toggle-mode">
                     <p>
-                        {isSignUp ? "Already have an account?" : "Don't have an account?"}{" "}
-                        <button type="button" onClick={toggleMode} className="toggle-btn">
-                            {isSignUp ? "Login" : "Sign Up"}
+                        Don't have an account?{" "}
+                        <button 
+                            type="button" 
+                            onClick={() => navigate('/signup')}
+                            className="toggle-btn"
+                        >
+                            Sign Up
                         </button>
                     </p>
                 </div>
