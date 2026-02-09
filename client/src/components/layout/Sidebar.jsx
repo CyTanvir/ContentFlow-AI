@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import "../styles/layout.css";
 import dashboardIcon from "../../assets/dashboard.png";
 import workflowIcon from "../../assets/Workflow.png";
@@ -8,24 +9,29 @@ import settingIcon from "../../assets/setting.png";
 import helpIcon from "../../assets/help.png";
 
 const routes = [
-  { key: "dashboard", label: "Dashboard", hash: "#/dashboard" },
-  { key: "workflow", label: "Workflow", hash: "#/workflow" },
-  { key: "documents", label: "AI Tools", hash: "#/aitools" },
-  { key: "review", label: "Projects", hash: "#/projects" }
-
+  { key: "dashboard", label: "Dashboard", path: "/dashboard" },
+  { key: "workflow", label: "Workflow", path: "/workflow" },
+  { key: "documents", label: "AI Tools", path: "/aitools" },
+  { key: "review", label: "Projects", path: "/projects" }
 ];
 
 const Sidebar = () => {
-  const [active, setActive] = useState(() => (window.location.hash || "#/dashboard").replace("#/", ""));
+  const navigate = useNavigate();
+  const location = useLocation();
+  
+  const getActiveKey = () => {
+    const path = location.pathname;
+    return routes.find(r => r.path === path)?.key || "dashboard";
+  };
 
-  useEffect(() => {
-    const onHash = () => setActive((window.location.hash || "#/dashboard").replace("#/", ""));
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, []);
+  const [active, setActive] = useState(getActiveKey());
 
-  const navigate = (hash) => {
-    if (window.location.hash !== hash) window.location.hash = hash;
+  React.useEffect(() => {
+    setActive(getActiveKey());
+  }, [location.pathname]);
+
+  const handleNavigate = (path) => {
+    navigate(path);
   };
 
   return (
@@ -47,7 +53,7 @@ const Sidebar = () => {
             <button
               key={r.key}
               className={`nav-item ${active === r.key ? "active" : ""}`}
-              onClick={() => navigate(r.hash)}
+              onClick={() => handleNavigate(r.path)}
             >
               {icon ? <img src={icon} alt="" className="nav-icon-img nav-icon-small" /> : <span className="nav-icon" aria-hidden />}
               <span className="nav-label">{r.label}</span>
@@ -58,11 +64,11 @@ const Sidebar = () => {
 
       <div className="sidebar-bottom">
         <div className="sidebar-actions">
-          <button className="action-item" onClick={() => navigate('#/settings')}>
+          <button className="action-item" onClick={() => handleNavigate('/settings')}>
             <img src={settingIcon} alt="settings" style={{width:16,height:16,marginRight:8}} />
             Settings
           </button>
-          <button className="action-item" onClick={() => navigate('#/help')}>
+          <button className="action-item" onClick={() => handleNavigate('/help')}>
             <img src={helpIcon} alt="help" style={{width:16,height:16,marginRight:8}} />
             Help
           </button>
