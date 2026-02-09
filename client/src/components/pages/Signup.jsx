@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
-import '../Auth.css';
+import { useNavigate } from 'react-router-dom';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { auth } from '../../firebase';
+import '../styles/Signup.css';
+import Login from "../pages/Login";
 
-function Signup() {
+function Signup({ onSignup }) {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -10,6 +14,7 @@ function Signup() {
     confirmPassword: ''
   });
   const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -53,21 +58,46 @@ function Signup() {
       setErrors(validationErrors);
       return;
     }
+
+    setIsLoading(true);
     
-    // TODO: Connect to backend API
-    console.log('Signup data:', formData);
-    
-    // Clear form
-    setFormData({
-      name: '',
-      email: '',
-      password: '',
-      confirmPassword: ''
-    });
-    setErrors({});
-    
-    alert('Account created successfully! Redirecting to dashboard...');
-    // window.location.href = '/dashboard';
+    try {
+      // Create user with Firebase
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+
+      // Update user profile with display name
+      await updateProfile(userCredential.user, {
+        displayName: formData.name
+      });
+
+      // Clear form
+      setFormData({
+        name: '',
+        email: '',
+        password: '',
+        confirmPassword: ''
+      });
+      setErrors({});
+      
+      // Call onSignup callback to update login state
+      if (onSignup) {
+        onSignup(userCredential.user);
+      }
+      
+      alert('Account created successfully! Redirecting to dashboard...');
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Signup error:', error);
+      setErrors({
+        submit: error.message || 'Failed to create account. Please try again.'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -135,27 +165,50 @@ function Signup() {
             {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
           </div>
           
-          <button type="submit" className="auth-button">
-            Create Account
+          <button type="submit" className="auth-button" disabled={isLoading}>
+            {isLoading ? 'Creating Account...' : 'Create Account'}
           </button>
         </form>
         
         <div className="auth-footer">
           <p>
             Already have an account?{' '}
-            <Link to="/login" className="auth-link">
+            <button 
+              type="button"
+              onClick={() => navigate('/login')} 
+              className="auth-link"
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, font: 'inherit' }}
+            >
               Sign in here
-            </Link>
+            </button>
           </p>
+          
+          {errors.submit && <span className="error-message">{errors.submit}</span>}
           
           <div className="terms-text">
             By creating an account, you agree to our{' '}
             <a href="/terms" className="terms-link">Terms of Service</a> and{' '}
             <a href="/privacy" className="terms-link">Privacy Policy</a>
           </div>
+          
+        </div>
+        
+      </div>
+      <div className="auth-side-panel">
+        <h2>Start Automating Your Content Workflow</h2>
+        <ul className="features-list">
+          <li>AI-powered content generation</li>
+          <li> Multi-stage workflow management</li>
+          <li>Real-time collaboration</li>
+          <li> Analytics dashboard</li>
+          <li> Gemini API integration</li>
+        </ul>
+        
+        <div className="testimonial">
+          <p>"ContentFlow AI cut our content production time by 70%"</p>
+          <small>- Marketing Team Lead</small>
         </div>
       </div>
-      
     </div>
   );
 }
