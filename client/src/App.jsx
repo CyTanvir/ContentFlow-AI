@@ -22,11 +22,8 @@ function App() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-    } catch (error) {
-      console.error("Error signing out:", error);
-    } finally {
-      localStorage.removeItem("userSession");
-      setIsLoggedIn(false);
+    } catch (e) {
+      console.error("Error signing out:", e);
     }
   };
 
