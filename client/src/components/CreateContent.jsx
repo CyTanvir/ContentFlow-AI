@@ -5,9 +5,19 @@ import { db } from "../firebase";
 import "./styles/createContent.css";
 
 const CreateContent = ({ isOpen, onClose, onSuccess }) => {
+  const CONTENT_TEMPLATES = [
+    {
+      id: "thought-leadership",
+      name: "Thought Leadership",
+      title: "Industry Insight: ",
+      text: "Share a unique perspective on an industry trend, challenge, or insight.\n\n• Key insight:\n• Why it matters:\n• Call to action:",
+    },
+   
+  ];
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
   const [status, setStatus] = useState("Draft");
+  const [selectedTemplate, setSelectedTemplate] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const auth = getAuth();
@@ -49,6 +59,15 @@ const CreateContent = ({ isOpen, onClose, onSuccess }) => {
     }
   };
 
+  const handleTemplateSelect = (templateId) => {
+    const template = CONTENT_TEMPLATES.find((t) => t.id === templateId);
+    if (!template) return;
+
+    setSelectedTemplate(templateId);
+    setTitle(template.title);
+    setText(template.text);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -60,6 +79,22 @@ const CreateContent = ({ isOpen, onClose, onSuccess }) => {
         </div>
 
         <form onSubmit={handleSubmit} className="create-content-form">
+          <div className="form-group">
+            <label htmlFor="template">Start from a Template</label>
+            <select
+              id="template"
+              value={selectedTemplate}
+              onChange={(e) => handleTemplateSelect(e.target.value)}
+              disabled={loading}
+            >
+              <option value="">Blank Content</option>
+              {CONTENT_TEMPLATES.map((template) => (
+                <option key={template.id} value={template.id}>
+                  {template.name}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="form-group">
             <label htmlFor="title">Title</label>
             <input
