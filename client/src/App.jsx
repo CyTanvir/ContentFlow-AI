@@ -37,10 +37,31 @@ function App() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
-    } catch (e) {
+      localStorage.removeItem("userSession");
+      setIsLoggedIn(false);
+    } 
+    // for security and privacy reasons, we want to ensure that the user's session is fully cleared on logout
+    catch (e) {
       console.error("Error signing out:", e);
     }
   };
+
+  // Auto sign-out when page is closed/unloaded ADDED 2/10 because there was a bug where users would stay logged in after closing the tab
+  // which caused confusion when they returned and found their session still active. 
+
+  useEffect(() => {
+    const handleBeforeUnload = async () => {
+      try {
+        await signOut(auth);
+        localStorage.removeItem("userSession");
+      } catch (e) {
+        console.error("Error signing out on unload:", e);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
 
   // Ensure local session is cleared and app state updates after sign-out
   const handleLogoutCleanup = async () => {
