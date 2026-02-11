@@ -28,7 +28,12 @@ export default function Login({ onLogin }) {
             const user = userCredential.user;
             const idToken = await user.getIdToken();
 
-            onLogin({ uid: user.uid, email: user.email, token: idToken });
+            onLogin({
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName || "",
+                token: idToken,
+              });
         } catch (err) {
             setError("Invalid email or password.");
             console.error("Login error:", err);
