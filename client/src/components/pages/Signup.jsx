@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile, sendEmailVerification, signOut } from 'firebase/auth';
 import { auth } from '../../firebase';
 import '../styles/Signup.css';
 import Login from "../pages/Login";
 
-function Signup({ onSignup }) {
+function Signup() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
@@ -74,6 +74,12 @@ function Signup({ onSignup }) {
         displayName: formData.name
       });
 
+      // Send email verification
+      await sendEmailVerification(userCredential.user);
+
+      // Log out the user immediately after signup to enforce email verification
+      await signOut(auth); 
+
       // Clear form
       setFormData({
         name: '',
@@ -82,18 +88,26 @@ function Signup({ onSignup }) {
         confirmPassword: ''
       });
       setErrors({});
+
+      // Show success message
+      alert('Account created successfully! Please check your email to verify your account before logging in.');
       
-      // Call onSignup callback to update login state
-      if (onSignup) {
-        onSignup(userCredential.user);
-      }
-      
-      alert('Account created successfully! Redirecting to dashboard...');
-      navigate('/dashboard');
+      navigate('/login');
     } catch (error) {
       console.error('Signup error:', error);
+      let errorMessage = 'Failed to create account. Please try again.';
+      
+      // Handle specific Firebase errors
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage = 'This email is already registered.';
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage = 'Password is too weak. Please use a stronger password.';
+      } else if (error.code === 'auth/invalid-email') {
+        errorMessage = 'Invalid email address.';
+      }
+      
       setErrors({
-        submit: error.message || 'Failed to create account. Please try again.'
+        submit: errorMessage
       });
     } finally {
       setIsLoading(false);
