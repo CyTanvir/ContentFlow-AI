@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { collection, getDocs, query, where, doc, updateDoc, deleteDoc, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, getDoc, updateDoc, deleteDoc, orderBy } from "firebase/firestore";
 import { db } from "../../firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import CreateContent from "../CreateContent";
@@ -17,13 +17,13 @@ export default function Dashboard() {
   const [editingContent, setEditingContent] = useState({ title: "", text: "", status: "Draft"});
 
   const auth = getAuth();
-
+  
   useEffect(() => {
     // Listen for auth state changes
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       if (user) {
-        fetchContent(user);
+        fetchContent();
       } else {
         setLoading(false);
         setError("Please sign in to view your content");
@@ -35,7 +35,8 @@ export default function Dashboard() {
   }, [navigate]);
 
   const fetchContent = async (user) => {
-    if (!user) {
+    const currentUser = user || auth.currentUser;
+    if (!currentUser) {
       setError("User not authenticated");
       setLoading(false);
       return;
@@ -111,6 +112,7 @@ export default function Dashboard() {
             text: item.text,
             status: item.status,
             id: item.id
+      
         });
     };
 
@@ -125,10 +127,11 @@ export default function Dashboard() {
             await updateDoc(contentRef, {
                 title: editingContent.title,
                 text: editingContent.text,
-                status: editingContent.status
+                status: editingContent.status,
+                userId: user.uid
             });
             setExpandedId(null);
-            fetchContent(user);
+            fetchContent();
         } catch (error) {
             console.error("Error updating content:", error);
             setError("Failed to update content");
@@ -136,15 +139,20 @@ export default function Dashboard() {
     };
 
     const handleDeleteContent = async (contentId) => {
-        if (confirm("Are you sure you want to delete this content?")) {
-            try {
-                await deleteDoc(doc(db, "content", contentId));
-                setExpandedId(null);
-                fetchContent(user);
-            } catch (error) {
-                console.error("Error deleting content:", error);
-                setError("Failed to delete content");
-            }
+         try {
+          if (!auth.currentUser) return console.error('Not signed in at delete time');
+          const docRef = doc(db, 'content', contentId);
+          const snap = await getDoc(docRef);
+          console.log('Doc data before delete:', snap.exists() ? snap.data() : null);
+          console.log('Current uid:', auth.currentUser.uid);
+          if (!snap.exists()) return console.error('Doc not found');
+          if (snap.data().userId !== auth.currentUser.uid) return console.error('Owner mismatch — cannot delete');
+          await deleteDoc(docRef);
+          console.log('Deleted', contentId);
+          setExpandedId(null);
+          fetchContent();
+        } catch (error) {
+          console.error('Error deleting content:', error);
         }
     };
 
