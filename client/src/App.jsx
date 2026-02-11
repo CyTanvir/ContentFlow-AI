@@ -27,7 +27,7 @@ function App() {
     sessionUser?.email ||
     "User";
   
-  const displayName = rawName.split("@")[0];
+    const displayName = rawName.includes("@") ? rawName.split("@")[0] : rawName;
 
   const handleLogin = (user) => {
     localStorage.setItem("userSession", JSON.stringify(user));

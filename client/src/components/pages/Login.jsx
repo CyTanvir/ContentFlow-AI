@@ -76,7 +76,12 @@ export default function Login({ onLogin }) {
             //Email is verified, proceed with login
             const idToken = await user.getIdToken();
 
-            onLogin({ uid: user.uid, email: user.email, token: idToken });
+            onLogin({
+                uid: user.uid,
+                email: user.email,
+                displayName: user.displayName || "",
+                token: idToken,
+              });
         } catch (err) {
             let errorMessage = "Login failed. Please try again.";
             // Handle specific Firebase errors
