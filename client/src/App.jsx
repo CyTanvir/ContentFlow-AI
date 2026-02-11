@@ -42,6 +42,13 @@ function App() {
     }
   };
 
+  // Ensure local session is cleared and app state updates after sign-out
+  const handleLogoutCleanup = async () => {
+    await handleLogout();
+    localStorage.removeItem("userSession");
+    setIsLoggedIn(false);
+  };
+
   return (
     <Router>
       <Routes>
@@ -56,7 +63,7 @@ function App() {
             <Route
   path="/dashboard"
   element={
-    <Layout onLogout={handleLogout} displayName={displayName}>
+    <Layout onLogout={handleLogoutCleanup} displayName={displayName}>
       <Dashboard />
     </Layout>
   }
@@ -65,7 +72,7 @@ function App() {
 <Route
   path="/workflow"
   element={
-    <Layout onLogout={handleLogout} displayName={displayName}>
+    <Layout onLogout={handleLogoutCleanup} displayName={displayName}>
       <Workflow />
     </Layout>
   }
