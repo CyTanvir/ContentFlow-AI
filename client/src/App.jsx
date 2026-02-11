@@ -37,10 +37,32 @@ function App() {
   const handleLogout = async () => {
     try {
       await signOut(auth);
+      localStorage.removeItem("userSession");
+      setIsLoggedIn(false);
     } catch (e) {
       console.error("Error signing out:", e);
+      // Even if Firebase sign out fails, clear local session
+      localStorage.removeItem("userSession");
+      setIsLoggedIn(false);
     }
   };
+
+  // Auto sign-out when page is closed/unloaded ADDED 2/11 because there was a bug where users would stay logged in after closing the tab
+  // which caused confusion when they returned and found their session still active. 
+  
+  useEffect(() => {
+    const handleBeforeUnload = async () => {
+      try {
+        await signOut(auth);
+        localStorage.removeItem("userSession");
+      } catch (e) {
+        console.error("Error signing out on unload:", e);
+      }
+    };
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+  }, []);
 
   return (
     <Router>

@@ -12,7 +12,24 @@ const CreateContent = ({ isOpen, onClose, onSuccess }) => {
       title: "Industry Insight: ",
       text: "Share a unique perspective on an industry trend, challenge, or insight.\n\n• Key insight:\n• Why it matters:\n• Call to action:",
     },
-   
+    {
+      id: "product-update",
+      name: "Product Update",
+      title: "Product Update: ",
+      text: "🚀 What’s new?\n\n• Feature update:\n• Who it helps:\n• How to get started:",
+    },
+    {
+      id: "tech-deep-dive",
+      name: "Tech Deep Dive",
+      title: "Tech Deep Dive: ",
+      text: "Let’s break down a technical concept.\n\n• Problem:\n• Solution:\n• Technical insight:",
+    },
+    {
+      id: "event-promo",
+      name: "Event Promotion",
+      title: "Join Us: ",
+      text: "📅 Event details\n\n• Date:\n• Time:\n• What you’ll learn:\n• Register link:",
+    },
   ];
   const [title, setTitle] = useState("");
   const [text, setText] = useState("");
