@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendEmailVerification } from "firebase/auth";
 import { auth } from "../../firebase";
 import "../styles/login.css";
 
@@ -12,14 +12,20 @@ export default function Login({ onLogin }) {
     const [password, setPassword] = useState("");
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [showResendVerification, setShowResendVerification] = useState(false);
+    const [unverifiedUser, setUnverifiedUser] = useState(null);
 
     const googleProvider = new GoogleAuthProvider();
 
     const handleGoogleSignIn = async () => {
         setLoading(true);
+        setError(null);
+        setShowResendVerification(false);
+
         try {
             const userCredential = await signInWithPopup(auth, googleProvider);
             const user = userCredential.user;
+            //Google accounts are always verified, so we can skip the email verification check
             const idToken = await user.getIdToken();
             onLogin({ uid: user.uid, email: user.email, token: idToken });
         } catch (err) {
@@ -29,6 +35,19 @@ export default function Login({ onLogin }) {
             setLoading(false);
         }   
     };
+
+    const handleResendVerification = async () => {
+        if (!unverifiedUser) return;
+        try {
+            await sendEmailVerification(unverifiedUser);
+            alert("Verification email sent!");
+            setShowResendVerification(false);
+        } catch (err) {
+            console.error("Error resending verification email:", err);
+            setError("Failed to resend verification email. Please try again later.");
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError("");
@@ -42,11 +61,38 @@ export default function Login({ onLogin }) {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
+
+            //Check if email is verified
+            if (!user.emailVerified) {
+                setError("Email not verified. Please check your inbox.");
+                setShowResendVerification(true);
+                setUnverifiedUser(user);//Store user for resending verification email
+                // Log out the unverified user immediately
+                await auth.signOut();
+                setError("Email not verified. Please check your inbox.");
+                setLoading(false);
+                return;
+            }
+            //Email is verified, proceed with login
             const idToken = await user.getIdToken();
 
             onLogin({ uid: user.uid, email: user.email, token: idToken });
         } catch (err) {
-            setError("Invalid email or password.");
+            let errorMessage = "Login failed. Please try again.";
+            // Handle specific Firebase errors
+            if (err.code === 'auth/user-not-found') {
+                errorMessage = 'No account found with this email.';
+            } else if (err.code === 'auth/wrong-password') {
+                errorMessage = 'Incorrect password.';
+            } else if (err.code === 'auth/invalid-email') {
+                errorMessage = 'Invalid email address.';
+            } else if (err.code === 'auth/user-disabled') {
+                errorMessage = 'This account has been disabled.';
+            } else if (err.code === 'auth/too-many-requests') {
+                errorMessage = 'Too many failed login attempts. Please try again later.';
+            }
+            
+            setError(errorMessage);
             console.error("Login error:", err);
         } finally {
             setLoading(false);
@@ -78,7 +124,26 @@ export default function Login({ onLogin }) {
                             placeholder="Enter your password"
                         />
                     </div>
-                    {error && <div className="error-message">{error}</div>}
+                   {error && (
+                        <div className="error-message">
+                            {error}
+                            {showResendVerification && (
+                                <div style={{ marginTop: '10px' }}>
+                                    <button
+                                        type="button"
+                                        onClick={handleResendVerification}
+                                        className="toggle-btn"
+                                        style={{ 
+                                            textDecoration: 'underline',
+                                            fontSize: '14px'
+                                        }}
+                                    >
+                                        Resend verification email
+                                    </button>
+                                </div>
+                            )}
+                        </div>
+                    )}
                     <button type="submit" className="login-btn" disabled={loading}>
                         {loading ? "Logging in..." : "Login"}
                     </button>
