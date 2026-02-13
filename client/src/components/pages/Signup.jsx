@@ -8,7 +8,8 @@ import Login from "../pages/Login";
 function Signup() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -58,8 +59,12 @@ function Signup() {
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'First name is required';
+    }
+
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'Last name is required';
     }
     
     if (!formData.email.trim()) {
@@ -77,6 +82,7 @@ function Signup() {
     if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
+    
     
     return newErrors;
   };
@@ -100,9 +106,10 @@ function Signup() {
         formData.password
       );
 
-      // Update user profile with display name
+      // Update user profile with display name constructed from first + last name
+      const displayName = `${formData.firstName.trim()} ${formData.lastName.trim()}`.trim();
       await updateProfile(userCredential.user, {
-        displayName: formData.name
+        displayName
       });
 
       // Send email verification
@@ -113,11 +120,13 @@ function Signup() {
 
       // Clear form
       setFormData({
-        name: '',
+        firstName: '',
+        lastName: '',
         email: '',
         password: '',
         confirmPassword: ''
       });
+
       setErrors({});
 
       // Show success message
@@ -155,20 +164,34 @@ function Signup() {
         </div>
         
         <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label htmlFor="name">Full Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Enter your full name"
-              className={errors.name ? 'input-error' : ''}
-            />
-            {errors.name && <span className="error-message">{errors.name}</span>}
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="firstName">First Name</label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                className={errors.firstName ? 'input-error' : ''}
+              />
+              {errors.firstName && <span className="error-message">{errors.firstName}</span>}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="lastName">Last Name</label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+
+                className={errors.lastName ? 'input-error' : ''}
+              />
+              {errors.lastName && <span className="error-message">{errors.lastName}</span>}
+            </div>
           </div>
-          
           <div className="form-group">
             <label htmlFor="email">Email Address</label>
             <input
@@ -177,7 +200,6 @@ function Signup() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Enter your email"
               className={errors.email ? 'input-error' : ''}
             />
             {errors.email && <span className="error-message">{errors.email}</span>}
@@ -191,7 +213,7 @@ function Signup() {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Create a password (min. 8 characters)"
+              placeholder="min. 8 characters"
               className={errors.password ? 'input-error' : ''}
             />
             {errors.password && <span className="error-message">{errors.password}</span>}
@@ -205,7 +227,6 @@ function Signup() {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              placeholder="Confirm your password"
               className={errors.confirmPassword ? 'input-error' : ''}
             />
             {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
