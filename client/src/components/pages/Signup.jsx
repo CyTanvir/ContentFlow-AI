@@ -17,6 +17,7 @@ function Signup() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const googleProvider = new GoogleAuthProvider();
 
   const handleChange = (e) => {
@@ -245,7 +246,7 @@ function Signup() {
             <label htmlFor="confirmPassword">Confirm Password</label>
             <div className="password-wrapper">
               <input
-                type={showPassword ? 'text' : 'password'}
+                type={showConfirmPassword ? 'text' : 'password'}
                 id="confirmPassword"
                 name="confirmPassword"
                 value={formData.confirmPassword}
@@ -255,10 +256,10 @@ function Signup() {
               <button
                 type="button"
                 className="password-toggle"
-                onClick={() => setShowPassword((s) => !s)}
-                aria-label={showPassword ? 'Hide password' : 'Show password'}
+                onClick={() => setShowConfirmPassword((s) => !s)}
+                aria-label={showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'}
               >
-                {showPassword ? (
+                {showConfirmPassword ? (
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M3 3l18 18" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                     <path d="M10.58 10.58a3 3 0 104.24 4.24" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
