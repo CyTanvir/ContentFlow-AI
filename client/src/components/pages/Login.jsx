@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendEmailVerification } from "firebase/auth";
+import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendEmailVerification, sendPasswordResetEmail } from "firebase/auth";
 import { auth } from "../../firebase";
 import "../styles/login.css";
 
@@ -14,6 +14,9 @@ export default function Login({ onLogin }) {
     const [loading, setLoading] = useState(false);
     const [showResendVerification, setShowResendVerification] = useState(false);
     const [unverifiedUser, setUnverifiedUser] = useState(null);
+    const [forgotLoading, setForgotLoading] = useState(false);
+    const [forgotError, setForgotError] = useState(null);
+    const [forgotMessage, setForgotMessage] = useState(null);
 
     const googleProvider = new GoogleAuthProvider();
 
@@ -104,6 +107,40 @@ export default function Login({ onLogin }) {
         }
     };
 
+    const [showPassword, setShowPassword] = useState(false);
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(!showPassword);
+    };
+
+    const handleForgotPassword = async () => {
+        setForgotError(null);
+        setForgotMessage(null);
+        const targetEmail = email.trim();
+        if (!targetEmail) {
+            setForgotError("Please enter your email address to reset password.");
+            return;
+        }
+        setForgotLoading(true);
+        try {
+            await sendPasswordResetEmail(auth, targetEmail);
+            setForgotMessage("Password reset email sent! Please check your inbox.");
+        } catch (err) {
+            console.error("Password reset error:", err);
+            if (err.code === 'auth/user-not-found') {
+                setForgotError("No account found with this email.");
+            } else if (err.code === 'auth/invalid-email') {
+                setForgotError("Invalid email address.");
+            } else if (err.code === 'auth/too-many-requests') {
+                setForgotError("Too many requests. Please try again later.");
+            } else {
+                setForgotError("Failed to send password reset email. Please try again.");
+            }
+        } finally {
+            setForgotLoading(false);
+        }
+    };
+
     return (
         <div className="login-container">
             <div className="login-box">
@@ -116,18 +153,21 @@ export default function Login({ onLogin }) {
                             id="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Enter your email"
+                            placeholder="example@example.com"
                         />
                     </div>
                     <div className="form-group">
                         <label htmlFor="password">Password:</label>
                         <input
-                            type="password"
+                            type={showPassword ? "text" : "password"}
                             id="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Enter your password"
+                            
                         />
+                        <button type="button" onClick={togglePasswordVisibility} className="toggle-password-btn">
+                            {showPassword ? "Hide" : "Show"}
+                        </button>
                     </div>
                    {error && (
                         <div className="error-message">
@@ -149,6 +189,18 @@ export default function Login({ onLogin }) {
                             )}
                         </div>
                     )}
+                    <div className="forgot-row">
+                        <button 
+                            type="button" 
+                            className="toggle-btn forgot-link"
+                            onClick={handleForgotPassword}
+                            disabled={forgotLoading}
+                        >
+                            {forgotLoading ? "Sending..." : "Forgot Password?"}
+                        </button>
+                    </div>
+                    {forgotError && <div className="error-message">{forgotError}</div>}
+                    {forgotMessage && <div className="success-message">{forgotMessage}</div>}
                     <button type="submit" className="login-btn" disabled={loading}>
                         {loading ? "Logging in..." : "Login"}
                     </button>

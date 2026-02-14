@@ -23,6 +23,7 @@
 
 .form-group {
   margin-bottom: 20px;
+  position: relative;
 }
 
 .form-group label {
@@ -45,6 +46,15 @@
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+}
+
+/* make room so input text doesn't overlap the toggle button */
+.form-group input[type="password"],
+.form-group input[type="text"] {
+    padding-right: 3.5rem;
+    height: 44px;
+    font-size: 1rem;
+    line-height: 1.2;
 }
 
 .error {
@@ -95,6 +105,25 @@
 
 .toggle-btn:hover {
   color: #764ba2;
+}
+.toggle-password-btn {
+    position: absolute;
+    right: 0.5rem;
+    top: 72%;
+    display: inline-flex;
+    transform: translateY(-50%);
+    background: transparent;
+    justify-content: center;
+    height: calc(100% - 8px);
+    border: none;
+    color: inherit;
+    font-size: 0.95rem;
+    padding: 0 8px;
+    cursor: pointer;
+    z-index: 2;
+    align-items: center;
+    gap: 4px;
+    color: #667eea;
 }
 
 .oauth-separator {

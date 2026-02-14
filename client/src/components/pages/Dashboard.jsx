@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { collection, getDocs, query, orderBy, doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { collection, getDocs, query, where, doc, updateDoc, deleteDoc, orderBy } from "firebase/firestore";
 import { db } from "../../firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import CreateContent from "../CreateContent";
@@ -17,12 +17,12 @@ export default function Dashboard() {
   const [editingContent, setEditingContent] = useState({ title: "", text: "", status: "Draft" });
 
   const auth = getAuth();
-
+  
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       if (user) {
-        fetchContent(user);
+        fetchContent();
       } else {
         setLoading(false);
         setError("Please sign in to view your content");
@@ -34,7 +34,8 @@ export default function Dashboard() {
   }, [navigate]);
 
   const fetchContent = async (user) => {
-    if (!user) {
+    const currentUser = user || auth.currentUser;
+    if (!currentUser) {
       setError("User not authenticated");
       setLoading(false);
       return;
@@ -167,6 +168,67 @@ export default function Dashboard() {
       </div>
     );
   }
+
+  const getStatusColor = (status) => {
+      switch(status) {
+          case "draft":
+              return "#gray";
+          case "planning":
+              return "#blue";
+          case "review":
+              return "#orange";
+          case "update":
+              return "#yellow";
+          case "ready-to-post":
+              return "#green";
+          default:
+              return "#gray";
+      }
+  };
+
+  const handleExpandCard = (item) => {
+        setExpandedId(item.id);
+        setEditingContent({
+            title: item.title,
+            text: item.text,
+            status: item.status,
+            id: item.id
+        });
+    };
+
+    const handleCloseExpanded = () => {
+        setExpandedId(null);
+        setEditingContent({ title: "", text: "", status: "draft" });
+    };
+
+    const handleSaveChanges = async () => {
+        try {
+            const contentRef = doc(db, "content", editingContent.id);
+            await updateDoc(contentRef, {
+                title: editingContent.title,
+                text: editingContent.text,
+                status: editingContent.status
+            });
+            setExpandedId(null);
+            fetchContent(user);
+        } catch (error) {
+            console.error("Error updating content:", error);
+            setError("Failed to update content");
+        }
+    };
+
+    const handleDeleteContent = async (contentId) => {
+        if (confirm("Are you sure you want to delete this content?")) {
+            try {
+                await deleteDoc(doc(db, "content", contentId));
+                setExpandedId(null);
+                fetchContent(user);
+            } catch (error) {
+                console.error("Error deleting content:", error);
+                setError("Failed to delete content");
+            }
+        }
+    };
 
   return (
     <div className="dashboard-container">
