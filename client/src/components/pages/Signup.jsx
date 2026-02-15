@@ -5,10 +5,18 @@ import { auth } from '../../firebase';
 import '../styles/Signup.css';
 import Login from "../pages/Login";
 
+/**
+ * SIGNUP PAGE COMPONENT (Updated by Tanvir)
+ * - Changed from single "Full Name" field to separate "First Name" and "Last Name" fields
+ * - Maintains two-column layout with form on left, info panel on right
+ * - Features email verification and Google sign-up option
+ */
 function Signup() {
   const navigate = useNavigate();
+  // TANVIR: Split formData to include separate firstName and lastName fields
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     password: '',
     confirmPassword: ''
@@ -58,8 +66,14 @@ function Signup() {
   const validateForm = () => {
     const newErrors = {};
     
-    if (!formData.name.trim()) {
-      newErrors.name = 'Name is required';
+    // TANVIR: Validate firstName field
+    if (!formData.firstName.trim()) {
+      newErrors.firstName = 'First name is required';
+    }
+    
+    // TANVIR: Validate lastName field
+    if (!formData.lastName.trim()) {
+      newErrors.lastName = 'Last name is required';
     }
     
     if (!formData.email.trim()) {
@@ -100,9 +114,10 @@ function Signup() {
         formData.password
       );
 
-      // Update user profile with display name
+      // TANVIR: Combine first and last name for display name in Firebase auth
+      const fullName = `${formData.firstName} ${formData.lastName}`;
       await updateProfile(userCredential.user, {
-        displayName: formData.name
+        displayName: fullName
       });
 
       // Send email verification
@@ -111,9 +126,10 @@ function Signup() {
       // Log out the user immediately after signup to enforce email verification
       await signOut(auth); 
 
-      // Clear form
+      // Clear form with updated field names
       setFormData({
-        name: '',
+        firstName: '',
+        lastName: '',
         email: '',
         password: '',
         confirmPassword: ''
@@ -155,18 +171,35 @@ function Signup() {
         </div>
         
         <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label htmlFor="name">Full Name</label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Enter your full name"
-              className={errors.name ? 'input-error' : ''}
-            />
-            {errors.name && <span className="error-message">{errors.name}</span>}
+          {/* TANVIR: Split name field into firstName and lastName */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+            <div className="form-group">
+              <label htmlFor="firstName">First Name</label>
+              <input
+                type="text"
+                id="firstName"
+                name="firstName"
+                value={formData.firstName}
+                onChange={handleChange}
+                placeholder="Enter your first name"
+                className={errors.firstName ? 'input-error' : ''}
+              />
+              {errors.firstName && <span className="error-message">{errors.firstName}</span>}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="lastName">Last Name</label>
+              <input
+                type="text"
+                id="lastName"
+                name="lastName"
+                value={formData.lastName}
+                onChange={handleChange}
+                placeholder="Enter your last name"
+                className={errors.lastName ? 'input-error' : ''}
+              />
+              {errors.lastName && <span className="error-message">{errors.lastName}</span>}
+            </div>
           </div>
           
           <div className="form-group">

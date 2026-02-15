@@ -4,6 +4,12 @@ import { signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider, sendEm
 import { auth } from "../../firebase";
 import "../styles/login.css";
 
+/**
+ * LOGIN PAGE COMPONENT (Updated by Tanvir)
+ * - Redesigned with modern two-column layout for better UI consistency with Signup page
+ * - Info panel positioned on left side, form on right side (opposite of Signup for variety)
+ * - Features email verification check and password reset functionality
+ */
 export default function Login({ onLogin }) {
     const navigate = useNavigate();
     console.log("Rendering Login component");
@@ -20,6 +26,7 @@ export default function Login({ onLogin }) {
 
     const googleProvider = new GoogleAuthProvider();
 
+    // TANVIR: Handle Google sign-in with verification and token generation
     const handleGoogleSignIn = async () => {
         setLoading(true);
         setError(null);
@@ -142,34 +149,65 @@ export default function Login({ onLogin }) {
     };
 
     return (
+        // TANVIR: Modern auth container with reversed layout (info left, form right)
         <div className="login-container">
-            <div className="login-box">
-                <h1>ContentFlow AI</h1>
-                <form onSubmit={handleSubmit}>
+            {/* Left side: Info panel with features and testimonial */}
+            <div className="login-side-panel">
+                <h2>Welcome Back to ContentFlow AI</h2>
+                <ul className="features-list">
+                    <li>Manage your content workflow</li>
+                    <li>Track multiple content stages</li>
+                    <li>AI-powered content generation</li>
+                    <li>Real-time collaboration</li>
+                    <li>Analytics dashboard</li>
+                </ul>
+                
+                <div className="testimonial">
+                    <p>"ContentFlow AI helps us stay organized and efficient"</p>
+                    <small>- Content Manager</small>
+                </div>
+            </div>
+
+            {/* Right side: Login form card */}
+            <div className="login-card">
+                <div className="auth-header">
+                    <h1>Sign In</h1>
+                    <p className="auth-subtitle">Access your ContentFlow AI account</p>
+                </div>
+                
+                <form onSubmit={handleSubmit} className="auth-form">
                     <div className="form-group">
-                        <label htmlFor="email">Email:</label>
+                        <label htmlFor="email">Email Address</label>
                         <input
                             type="email"
                             id="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
-                            placeholder="example@example.com"
+                            placeholder="Enter your email"
+                            className={error ? 'input-error' : ''}
                         />
                     </div>
+
                     <div className="form-group">
-                        <label htmlFor="password">Password:</label>
-                        <input
-                            type={showPassword ? "text" : "password"}
-                            id="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            
-                        />
-                        <button type="button" onClick={togglePasswordVisibility} className="toggle-password-btn">
-                            {showPassword ? "Hide" : "Show"}
-                        </button>
+                        <label htmlFor="password">Password</label>
+                        <div className="password-input-wrapper">
+                            <input
+                                type={showPassword ? "text" : "password"}
+                                id="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Enter your password"
+                                className={error ? 'input-error' : ''}
+                            />
+                            {/* TANVIR: Toggle password visibility button */}
+                            <button type="button" onClick={togglePasswordVisibility} className="toggle-password-btn">
+                                {showPassword ? "Hide" : "Show"}
+                            </button>
+                        </div>
                     </div>
-                   {error && (
+
+                    {/* TANVIR: Error messages with option to resend verification email */}
+                    {error && (
                         <div className="error-message">
                             {error}
                             {showResendVerification && (
@@ -177,11 +215,7 @@ export default function Login({ onLogin }) {
                                     <button
                                         type="button"
                                         onClick={handleResendVerification}
-                                        className="toggle-btn"
-                                        style={{ 
-                                            textDecoration: 'underline',
-                                            fontSize: '14px'
-                                        }}
+                                        className="resend-btn"
                                     >
                                         Resend verification email
                                     </button>
@@ -189,10 +223,12 @@ export default function Login({ onLogin }) {
                             )}
                         </div>
                     )}
+
+                    {/* TANVIR: Forgot password link with error/success messages */}
                     <div className="forgot-row">
                         <button 
                             type="button" 
-                            className="toggle-btn forgot-link"
+                            className="forgot-btn"
                             onClick={handleForgotPassword}
                             disabled={forgotLoading}
                         >
@@ -201,10 +237,12 @@ export default function Login({ onLogin }) {
                     </div>
                     {forgotError && <div className="error-message">{forgotError}</div>}
                     {forgotMessage && <div className="success-message">{forgotMessage}</div>}
-                    <button type="submit" className="login-btn" disabled={loading}>
-                        {loading ? "Logging in..." : "Login"}
+
+                    <button type="submit" className="auth-button" disabled={loading}>
+                        {loading ? "Signing in..." : "Sign In"}
                     </button>
                 </form>
+
                 <div className="oauth-separator">OR</div>
 
                 <div className="oauth-buttons">
@@ -223,15 +261,16 @@ export default function Login({ onLogin }) {
                         Sign in with Google
                     </button>
                 </div>
-                <div className="toggle-mode">
+
+                <div className="auth-footer">
                     <p>
-                        Don't have an account?{" "}
+                        Don't have an account?{' '}
                         <button 
-                            type="button" 
-                            onClick={() => navigate('/signup')}
-                            className="toggle-btn"
+                            type="button"
+                            onClick={() => navigate('/signup')} 
+                            className="auth-link"
                         >
-                            Sign Up
+                            Sign up here
                         </button>
                     </p>
                 </div>
