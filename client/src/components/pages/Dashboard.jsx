@@ -169,67 +169,8 @@ export default function Dashboard() {
     );
   }
 
-  const getStatusColor = (status) => {
-      switch(status) {
-          case "draft":
-              return "#gray";
-          case "planning":
-              return "#blue";
-          case "review":
-              return "#orange";
-          case "update":
-              return "#yellow";
-          case "ready-to-post":
-              return "#green";
-          default:
-              return "#gray";
-      }
-  };
-
-  const handleExpandCard = (item) => {
-        setExpandedId(item.id);
-        setEditingContent({
-            title: item.title,
-            text: item.text,
-            status: item.status,
-            id: item.id
-        });
-    };
-
-    const handleCloseExpanded = () => {
-        setExpandedId(null);
-        setEditingContent({ title: "", text: "", status: "draft" });
-    };
-
-    const handleSaveChanges = async () => {
-        try {
-            const contentRef = doc(db, "content", editingContent.id);
-            await updateDoc(contentRef, {
-                title: editingContent.title,
-                text: editingContent.text,
-                status: editingContent.status
-            });
-            setExpandedId(null);
-            fetchContent(user);
-        } catch (error) {
-            console.error("Error updating content:", error);
-            setError("Failed to update content");
-        }
-    };
-
-    const handleDeleteContent = async (contentId) => {
-        if (confirm("Are you sure you want to delete this content?")) {
-            try {
-                await deleteDoc(doc(db, "content", contentId));
-                setExpandedId(null);
-                fetchContent(user);
-            } catch (error) {
-                console.error("Error deleting content:", error);
-                setError("Failed to delete content");
-            }
-        }
-    };
-
+  //(Tanvir- merge fix): Removed duplicate handleSaveChanges, handleDeleteContent, and undefined state references
+  
   return (
     <div className="dashboard-container">
       <div className="dashboard-header">

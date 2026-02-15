@@ -13,6 +13,7 @@ function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(() => {
     return !!localStorage.getItem("userSession");
   });
+  // TANVIR: retrieve user information from stored session
   const sessionUser = (() => {
     try {
       return JSON.parse(localStorage.getItem("userSession") || "null");
@@ -21,13 +22,25 @@ function App() {
     }
   })();
   
+  // TANVIR: Get name from displayName, name, email, or default to "User"
   const rawName =
     sessionUser?.displayName ||
     sessionUser?.name ||
     sessionUser?.email ||
     "User";
   
-    const displayName = rawName.includes("@") ? rawName.split("@")[0] : rawName;
+  // TANVIR: Extract only first name from full name by splitting on space
+  // If it's an email, extract the part before @ sign
+  const extractFirstName = (fullName) => {
+    if (!fullName) return "User";
+    if (fullName.includes("@")) {
+      return fullName.split("@")[0];
+    }
+    // Remove extra whitespace and split by space to get first name
+    return fullName.trim().split(/\s+/)[0];
+  };
+  
+  const displayName = extractFirstName(rawName);
 
   const handleLogin = (user) => {
     localStorage.setItem("userSession", JSON.stringify(user));
