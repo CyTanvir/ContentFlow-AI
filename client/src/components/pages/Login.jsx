@@ -195,7 +195,7 @@ export default function Login({ onLogin }) {
               id="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
+              placeholder="example@contentflow.ai"
               className={error ? "input-error" : ""}
             />
           </div>
@@ -208,7 +208,7 @@ export default function Login({ onLogin }) {
                 id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
+                placeholder="ContentFlow123!"
                 className={error ? "input-error" : ""}
               />
               {/* TANVIR: Toggle password visibility button */}

@@ -181,7 +181,7 @@ function Signup() {
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
-                placeholder="Enter your first name"
+                placeholder="John"
                 className={errors.firstName ? 'input-error' : ''}
               />
               {errors.firstName && <span className="error-message">{errors.firstName}</span>}
@@ -195,7 +195,7 @@ function Signup() {
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
-                placeholder="Enter your last name"
+                placeholder="Doe"
                 className={errors.lastName ? 'input-error' : ''}
               />
               {errors.lastName && <span className="error-message">{errors.lastName}</span>}
@@ -210,7 +210,7 @@ function Signup() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Enter your email"
+              placeholder="example@contentflow.ai"
               className={errors.email ? 'input-error' : ''}
             />
             {errors.email && <span className="error-message">{errors.email}</span>}
@@ -224,7 +224,7 @@ function Signup() {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Create a password (min. 8 characters)"
+              placeholder="ContentFlow123!"
               className={errors.password ? 'input-error' : ''}
             />
             {errors.password && <span className="error-message">{errors.password}</span>}
@@ -238,7 +238,7 @@ function Signup() {
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              placeholder="Confirm your password"
+              placeholder="ContentFlow123!"
               className={errors.confirmPassword ? 'input-error' : ''}
             />
             {errors.confirmPassword && <span className="error-message">{errors.confirmPassword}</span>}
